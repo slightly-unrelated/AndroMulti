@@ -2,6 +2,14 @@ package java.main.AndroMulti.ui.main;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.nfc.tech.IsoDep;
+import android.nfc.tech.MifareClassic;
+import android.nfc.tech.MifareUltralight;
+import android.nfc.tech.Ndef;
+import android.nfc.tech.NfcA;
+import android.nfc.tech.NfcB;
+import android.nfc.tech.NfcF;
+import android.nfc.tech.NfcV;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -23,6 +31,19 @@ public class MainFragment extends Fragment {
     private static final String TAG = "MainFragment";
     private MainViewModel mViewModel;
     private ReaderTask readerTask;
+    Button testButton;
+
+    private final String[][] techList = new String[][] {
+            new String[] {
+                    NfcA.class.getName(),
+                    NfcB.class.getName(),
+                    NfcF.class.getName(),
+                    NfcV.class.getName(),
+                    IsoDep.class.getName(),
+                    MifareClassic.class.getName(),
+                    MifareUltralight.class.getName(), Ndef.class.getName()
+            }
+    };
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -40,12 +61,13 @@ public class MainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         NFCReader nfcReader = new NFCReader();
+        testButton = view.findViewById(R.id.button);
+
+
 
         readerTask = nfcReader.init(getContext());
-        Button testButton = view.findViewById(R.id.button);
 
         testButton.setOnClickListener(view1 -> {
-            readerTask.execute();
             Log.d(TAG, "onViewCreated: DONE");
         });
 
