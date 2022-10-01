@@ -2,6 +2,7 @@ package java.main.AndroMulti.ui.main;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Context;
 import android.nfc.tech.IsoDep;
 import android.nfc.tech.MifareClassic;
 import android.nfc.tech.MifareUltralight;
@@ -21,29 +22,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.main.AndroMulti.R;
 import java.main.AndroMulti.adapter.NFCReader;
 import java.main.AndroMulti.utils.ReaderTask;
+import java.util.Objects;
 
 public class MainFragment extends Fragment {
 
     private static final String TAG = "MainFragment";
+    private static final String STORED_DATA = "NFC_DATA";
     private MainViewModel mViewModel;
     private ReaderTask readerTask;
     Button testButton;
 
-    private final String[][] techList = new String[][] {
-            new String[] {
-                    NfcA.class.getName(),
-                    NfcB.class.getName(),
-                    NfcF.class.getName(),
-                    NfcV.class.getName(),
-                    IsoDep.class.getName(),
-                    MifareClassic.class.getName(),
-                    MifareUltralight.class.getName(), Ndef.class.getName()
-            }
-    };
+
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -69,6 +63,13 @@ public class MainFragment extends Fragment {
 
         testButton.setOnClickListener(view1 -> {
             Log.d(TAG, "onViewCreated: DONE");
+            String toastMessage = "";
+            requireActivity().getPreferences(Context.MODE_PRIVATE).getString(STORED_DATA, toastMessage);
+
+            Log.d(TAG, toastMessage);
+
+            Toast.makeText(getContext(), toastMessage, Toast.LENGTH_LONG).show();
+
         });
 
 
