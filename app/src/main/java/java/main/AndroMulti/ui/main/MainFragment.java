@@ -3,14 +3,7 @@ package java.main.AndroMulti.ui.main;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
-import android.nfc.tech.IsoDep;
-import android.nfc.tech.MifareClassic;
-import android.nfc.tech.MifareUltralight;
-import android.nfc.tech.Ndef;
-import android.nfc.tech.NfcA;
-import android.nfc.tech.NfcB;
-import android.nfc.tech.NfcF;
-import android.nfc.tech.NfcV;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.TextInputLayout;
+
 import java.main.AndroMulti.R;
 import java.main.AndroMulti.adapter.NFCReader;
 import java.main.AndroMulti.utils.ReaderTask;
@@ -32,11 +27,11 @@ import java.util.Objects;
 public class MainFragment extends Fragment {
 
     private static final String TAG = "MainFragment";
-    private static final String STORED_DATA = "NFC_DATA";
     private MainViewModel mViewModel;
     private ReaderTask readerTask;
-    Button testButton;
-
+    private Context mContext;
+    Button addIDButton;
+    TextInputLayout IDTextbox;
 
 
     public static MainFragment newInstance() {
@@ -47,6 +42,7 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        mContext = container.getContext();
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
@@ -55,24 +51,22 @@ public class MainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(MainViewModel.class);
         NFCReader nfcReader = new NFCReader();
-        testButton = view.findViewById(R.id.button);
-
-
+        addIDButton = view.findViewById(R.id.addIDButton);
+        IDTextbox = view.findViewById(R.id.IDTextbox);
 
         readerTask = nfcReader.init(getContext());
 
-        testButton.setOnClickListener(view1 -> {
-            Log.d(TAG, "onViewCreated: DONE");
-            String toastMessage = "";
-            requireActivity().getPreferences(Context.MODE_PRIVATE).getString(STORED_DATA, toastMessage);
+        addIDButton.setOnClickListener(view1 -> {
+            String message = "" +
+                    SharedPrefIO.getStoredCardID(mContext);
+            Log.d(TAG, message);
 
-            Log.d(TAG, toastMessage);
-
-            Toast.makeText(getContext(), toastMessage, Toast.LENGTH_LONG).show();
-
+            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
         });
+    }
 
-
+    public void onViewCallback() {
+        IDTextbox.getEditText().setText(SharedPrefIO.getStoredCardID(mContext));
     }
 
 }

@@ -2,13 +2,9 @@ package java.main.AndroMulti;
 
 import static android.content.ContentValues.TAG;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -24,20 +20,18 @@ import android.nfc.tech.NfcV;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
-import android.view.Menu;
-import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.main.AndroMulti.ui.main.MainFragment;
-import java.math.BigInteger;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.main.AndroMulti.ui.main.SharedPrefIO;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String[][] techList = new String[][] {
-            new String[] {
+    private MainFragment mainFragment;
+
+    private final String[][] techList = new String[][]{
+            new String[]{
                     NfcA.class.getName(),
                     NfcB.class.getName(),
                     NfcF.class.getName(),
@@ -48,16 +42,14 @@ public class MainActivity extends AppCompatActivity {
             }
     };
 
-    private SharedPreferences persistStore;
-    private static final String STORED_DATA = "NFC_DATA";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
+            mainFragment = MainFragment.newInstance();
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, MainFragment.newInstance())
+                    .replace(R.id.container, mainFragment)
                     .commitNow();
         }
     }
@@ -103,10 +95,10 @@ public class MainActivity extends AppCompatActivity {
                 byte[] empty = new byte[0];
                 byte[] id = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID);
                 byte[] payload = dumpTagData(tagN).getBytes();
+                mainFragment.onViewCallback();
                 NdefRecord record = new NdefRecord(NdefRecord.TNF_UNKNOWN, empty, id, payload);
                 NdefMessage msg = new NdefMessage(new NdefRecord[]{record});
                 msgs = new NdefMessage[]{msg};
-
 
 
             } else {
@@ -143,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
         byte[] id = tag.getId();
         sb.append("Tag ID (hex): ").append(getHex(id)).append("\n");
         sb.append("Tag ID (dec): ").append(getDec(id)).append("\n");
-
 
 
         String prefix = "android.nfc.tech.";
@@ -202,16 +193,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         Log.d("Datas: ", sb.toString());
-
-        persistStore = getPreferences(Context.MODE_PRIVATE);
-        persistStore.edit().putString(STORED_DATA, sb.toString()).apply();
-
-        String toastMessage = "";
-        persistStore.getString(STORED_DATA, toastMessage);
-
-        Log.d(TAG, toastMessage);
-
-        Toast.makeText(this, toastMessage, Toast.LENGTH_LONG).show();
+        Log.d("DATAID", getHex(tag.getId()));
+        SharedPrefIO.setStoredCardID(getApplicationContext(), getHex(tag.getId()));
 
         return sb.toString();
     }
@@ -225,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                 sb.append('0');
             sb.append(Integer.toHexString(b));
             if (i > 0) {
-                sb.append(" ");
+                sb.append(":");
             }
         }
         return sb.toString();
@@ -234,8 +217,8 @@ public class MainActivity extends AppCompatActivity {
     private long getDec(byte[] bytes) {
         long result = 0;
         long factor = 1;
-        for (int i = 0; i < bytes.length; ++i) {
-            long value = bytes[i] & 0xffl;
+        for (byte aByte : bytes) {
+            long value = aByte & 0xffl;
             result += value * factor;
             factor *= 256l;
         }
