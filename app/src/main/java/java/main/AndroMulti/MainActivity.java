@@ -59,7 +59,9 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d("onResume", "1");
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0));
         IntentFilter filter = new IntentFilter();
         filter.addAction(NfcAdapter.ACTION_TAG_DISCOVERED);
         filter.addAction(NfcAdapter.ACTION_NDEF_DISCOVERED);
